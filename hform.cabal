@@ -15,8 +15,10 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src/lib
-  exposed-modules:     Hform
-  build-depends:       base >= 4.7 && < 5
+  exposed-modules:     Hform,
+                       Data.Logic.PropositionalFormula
+  build-depends:       base >= 4.7 && < 5,
+                       prettyprinter
   default-language:    Haskell2010
 
 

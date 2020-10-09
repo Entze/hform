@@ -1,5 +1,5 @@
 
 
 main :: IO ()
-main = do 
-        return ()
+main = do
+    return ()
