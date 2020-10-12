@@ -52,7 +52,7 @@ import           Data.Set                  (empty, findIndex, insert)
 
 import           Data.String               (String)
 
-import           Data.Text.Prettyprint.Doc (Doc, Pretty (pretty), (<>))
+import           Data.Text.Prettyprint.Doc (rparen, lparen, space, Doc, Pretty (pretty), (<>))
 
 import           Data.Tuple                (fst)
 
@@ -118,21 +118,18 @@ prettyWithSetInfix symbolSet precedence formula = case operands formula of
                                         2 -> prettyWithSetInfixBinary formula
                                         _ -> pretty ""
     where
-    b = pretty ' '
-    o = pretty '('
-    c = pretty ')'
     prettyWithSetInfixUnary formula
         | precedence formula > precedence subformula = op <> sub
-        | otherwise = op <> o <> sub <> c
+        | otherwise = op <> lparen <> sub <> rparen
         where
             subformula = head (immediateSubformulas formula)
             op = pretty (symbolSet formula)
             sub = prettyWithSetInfix symbolSet precedence subformula
     prettyWithSetInfixBinary formula
         | sub1NoParen && sub2NoParen = sub1 <> op <> sub2
-        | sub1NoParen = sub1 <> op <> o <> sub2 <> c
-        | sub2NoParen = o <> sub1 <> c <> op <> sub2
-        | otherwise = o <> sub1 <> c <> op <> o <> sub2 <> c
+        | sub1NoParen = sub1 <> op <> lparen <> sub2 <> rparen
+        | sub2NoParen = lparen <> sub1 <> rparen <> op <> sub2
+        | otherwise = lparen <> sub1 <> rparen <> op <> lparen <> sub2 <> lparen
         where
             sub1NoParen = predForm > predSub1 || (isAsso && opForm == opSub1)
             sub2NoParen = predForm > predSub2 || (isAsso && opForm == opSub2)
@@ -146,7 +143,7 @@ prettyWithSetInfix symbolSet precedence formula = case operands formula of
             predForm = precedence formula
             predSub1 = precedence subformula1
             predSub2 = precedence subformula2
-            op = b <> pretty (symbolSet formula) <> b
+            op = space <> pretty (symbolSet formula) <> space
             sub1 = prettyWithSetInfix symbolSet precedence subformula1
             sub2 = prettyWithSetInfix symbolSet precedence subformula2
 
