@@ -18,7 +18,8 @@ library
   exposed-modules:     Hform,
                        Hform.Util
                        Data.Logic.PropositionalFormula,
-                       Data.Logic.DNFClauses
+                       Data.Logic.DNFClauses,
+                       Data.Logic.CNFClauses
   build-depends:       base >= 4.7 && < 5,
                        containers >= 0.6 && < 1,
                        prettyprinter >= 1.6 && < 2

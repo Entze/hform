@@ -52,7 +52,7 @@ import           Data.Set                  (empty, findIndex, insert)
 
 import           Data.String               (String)
 
-import           Data.Text.Prettyprint.Doc (rparen, lparen, space, Doc, Pretty (pretty), (<>))
+import           Data.Text.Prettyprint.Doc (parens, (<+>), Doc, Pretty (pretty), (<>))
 
 import           Data.Tuple                (fst)
 
@@ -120,16 +120,16 @@ prettyWithSetInfix symbolSet precedence formula = case operands formula of
     where
     prettyWithSetInfixUnary formula
         | precedence formula > precedence subformula = op <> sub
-        | otherwise = op <> lparen <> sub <> rparen
+        | otherwise = op <> parens sub
         where
             subformula = head (immediateSubformulas formula)
             op = pretty (symbolSet formula)
             sub = prettyWithSetInfix symbolSet precedence subformula
     prettyWithSetInfixBinary formula
-        | sub1NoParen && sub2NoParen = sub1 <> op <> sub2
-        | sub1NoParen = sub1 <> op <> lparen <> sub2 <> rparen
-        | sub2NoParen = lparen <> sub1 <> rparen <> op <> sub2
-        | otherwise = lparen <> sub1 <> rparen <> op <> lparen <> sub2 <> lparen
+        | sub1NoParen && sub2NoParen = sub1 <+> op <+> sub2
+        | sub1NoParen = sub1 <+> op <+> parens sub2
+        | sub2NoParen = parens sub1 <+> op <+> sub2
+        | otherwise = parens sub1 <+> op <+> parens sub2
         where
             sub1NoParen = predForm > predSub1 || (isAsso && opForm == opSub1)
             sub2NoParen = predForm > predSub2 || (isAsso && opForm == opSub2)
@@ -143,7 +143,7 @@ prettyWithSetInfix symbolSet precedence formula = case operands formula of
             predForm = precedence formula
             predSub1 = precedence subformula1
             predSub2 = precedence subformula2
-            op = space <> pretty (symbolSet formula) <> space
+            op = pretty (symbolSet formula)
             sub1 = prettyWithSetInfix symbolSet precedence subformula1
             sub2 = prettyWithSetInfix symbolSet precedence subformula2
 

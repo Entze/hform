@@ -4,19 +4,19 @@ module Data.Logic.DNFClauses (
     clauseListFromFormula,clauseListToClauses,fromIntFormula,fromFormula,
     removeRedundantClauses) where
 
-import Hform.Util (hasAbsoluteDuplicatesIntSet)
+import Hform.Util (countLiterals, countClauses, hasAbsoluteDuplicatesIntSet, prettyClauseList)
 
 import Prelude ()
 import Data.Bool (not)
 import           Data.Function                   ((.))
 import           Data.Eq (Eq)
 import           Data.Int                        (Int)
-import           Data.IntSet                     (foldl, IntSet, fromList)
-import           Data.List                       (foldl, map)
+import           Data.IntSet                     (elems, IntSet, fromList)
+import           Data.List                       (map)
 import           Data.Ord                        (Ord)
-import           Data.Set                        (filter, Set, fromList,foldl)
+import           Data.Set                        (elems, filter, Set, fromList)
 import           Text.Show                       (Show)
-import           Data.Text.Prettyprint.Doc       (Doc, line, space, Pretty(pretty), emptyDoc, (<>))
+import           Data.Text.Prettyprint.Doc       ((<+>), line, Pretty(pretty), (<>))
 
 import           Data.Logic.PropositionalFormula (PropositionalFormula,
                                                   renameNegationsToMinus,
@@ -28,18 +28,15 @@ newtype DNFClauseList = DNFList [[Int]] deriving (Show, Eq, Ord)
 newtype DNFClauses = DNF (Set IntSet) deriving (Show, Eq, Ord)
 
 instance Pretty DNFClauseList where
-    pretty (DNFList lists) = Data.List.foldl pretty' emptyDoc lists
-        where
-            pretty' e list = e <> Data.List.foldl pretty'' emptyDoc list <> pretty (0 :: Int) <> line
-            pretty'' e i = e <> pretty i <> space
+    pretty (DNFList lists) = pretty 'p' <+> pretty "dnf" <+> (pretty . countLiterals) lists <+> (pretty . countClauses) lists <> line <> prettyClauseList lists
+
 
 instance Pretty DNFClauses where
-    pretty (DNF sets) = Data.Set.foldl pretty' emptyDoc sets
+    pretty (DNF sets) = pretty 'p' <+> pretty "dnf" <+> (pretty . countLiterals) lists <+> (pretty . countClauses) lists <> line <> prettyClauseList lists
         where
-            pretty' :: Doc ann -> IntSet -> Doc ann
-            pretty' e set = e <> Data.IntSet.foldl pretty'' emptyDoc set <> pretty (0 :: Int) <> line
-            pretty'' :: Doc ann -> Int -> Doc ann
-            pretty'' e i = e <> pretty i <> space
+            lists = (Data.List.map Data.IntSet.elems .  Data.Set.elems) sets
+
+
 
 clauseListFromFormula :: Data.Logic.PropositionalFormula.PropositionalFormula Int -> DNFClauseList
 clauseListFromFormula formula = DNFList (toListsOfListClausesDNF formula)
@@ -55,20 +52,3 @@ fromFormula = fromIntFormula . renameNegationsToMinus . toDNF . renameToIntFromO
 
 removeRedundantClauses :: DNFClauses -> DNFClauses
 removeRedundantClauses (DNF set) = DNF (Data.Set.filter (not . hasAbsoluteDuplicatesIntSet) set)
-
-
-
-{-
-removeRedundantLiterals :: DNFClauses -> DNFClauses
-removeRedundantLiterals (DNF set) = DNF (Data.Set.map removeAbsoluteDuplicates set)
-    where
-        removeAbsoluteDuplicates :: IntSet -> IntSet
-        removeAbsoluteDuplicates set = set \\ absoluteDuplicates
-            where
-                absoluteDuplicates = Data.IntSet.filter ((`Data.IntSet.member` set) . negate) set
-
-
-removeRedundantClauses :: DNFClauses -> DNFClauses
-removeRedundantClauses (DNF set) = DNF ()
-
--}
